@@ -9,6 +9,9 @@ chat history a typical agent framework piles up.
 Define bite-sized tasks in TOML, point it at your test runner, and let it
 iterate until the tests pass.
 
+## The Purpose
+This is my answer to subsidizing cloud API costs with my local LLM with a workflow I can trust. The workflow I got nailed down is that I would talk with the godfather cloud AI about a feature, say something like full stack notifications for a web app. Cloud AI will read through and create the task toml file and it would kick off the lean-qwen script. The local AI would do the bulk of the work autonomously leading to a 10x cloud saving expenditure according to Claude code. The savings scale linearly with feature and task length.
+
 ## The loop
 
 ```
@@ -20,12 +23,9 @@ for each task in loopfix.toml:
     5. if tests pass → next task
        if tests fail → enter fix loop (up to max_iters):
            a. compress the error output (tail N lines, strip dep noise)
-           b. for Python tracebacks: parse the failing frame, dump the
-              source window around the failing line
-              otherwise: send error tail + git diff + task files
-           c. ask qwen for a one-sentence diagnosis
-           d. ask qwen to fix it
-           e. re-run tests; loop
+           b. ask qwen for a one-sentence diagnosis
+           c. ask qwen to fix it
+           d. re-run tests; loop
 ```
 
 Each model call is self-contained — no chat history is carried between tasks
@@ -37,15 +37,13 @@ orchestrates.
 - Python 3.11+ (stdlib only — no `pip install` needed)
 - [Qwen Code CLI](https://github.com/QwenLM/qwen-code) on your `PATH`
 - A running OpenAI-compatible LLM server (e.g. `llama-server` from llama.cpp
-  serving a Qwen GGUF). `loop_fix.py` does **not** start, stop, or escalate
-  between servers — you start the server yourself, it must be reachable at
-  the configured health URL before you launch the loop.
+  serving a Qwen GGUF).
 
 ## Install
 
 Two options:
 
-**Clone and run** (simplest, what BANDEEZY uses):
+**Clone and run**
 ```
 git clone <this repo> lean-qwen && cd lean-qwen
 python3 loop_fix.py --help
